@@ -1,8 +1,10 @@
+import math
+
 
 def sim_config_init(game_type='fear', sampling=None, purification=None,
-                    trembling=0.2, theta=0.2, bandwidth=None, asynchronous=True,
-                    lgr=(10,1.1,0.5), cdf_bound=(1.256,10),
-                    num_bots=20, game_length=600,
+                    trembling=0., theta=0.05, bandwidth=None, asynchronous=False,
+                    lgr=(10,1.1,0.5),
+                    num_bots=20, game_length=1000,
                     x_bound=(0,13)):
     '''
     Specify simulation configuration parameters
@@ -48,8 +50,8 @@ def sim_config_init(game_type='fear', sampling=None, purification=None,
     config['rho'] = lgr[2]
 
     # rush range (MUST BE CORRECT IF STARTING AT CDF)
-    config['cdfmin'] = cdf_bound[0]
-    config['cdfmax'] = cdf_bound[1]
+    config['cdfmin'] = round((config['lambda'] - math.sqrt(1+config['lambda']**2) * math.sqrt(1-(16*(1+config['rho'])*(config['gamma']-1))/((config['gamma'] +3*config['rho'])*(3*config['gamma'] +config['rho'])))),2)
+    config['cdfmax'] = config['lambda']
 
     # game synchronicity
     # False means all players decide their moves based on the previous tick

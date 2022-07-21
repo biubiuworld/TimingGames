@@ -41,10 +41,10 @@ def initialize_player_strategies(config):
         for i in range(num_bots):
             # y_ind is the index in the cdf to compare to
             # we increment it until it is greater than or equal to the percentage of players set so far
-            if i/num_bots <= cdfy[y_ind]:
+            if (i+1)/num_bots <= cdfy[y_ind]:
                 strategies.append(cdfx[y_ind])
             else:
-                while y_ind < len(cdfy) - 1 and i/num_bots > cdfy[y_ind]:
+                while y_ind < len(cdfy) - 1 and (i+1)/num_bots > cdfy[y_ind]:
                     y_ind = y_ind + 1
                 # there are some rounding issues when we reach the end of the cdf
                 # if we reach the end (for the last few players), just use the last value
@@ -71,10 +71,10 @@ def initialize_player_strategies(config):
         while i > 0:
             # y_ind is the index in the cdf to compare to
             # we decrement it until it is less than or equal to the percentage of players set so far
-            if i/num_bots >= cdfy[y_ind]:
+            if (i+1)/num_bots >= cdfy[y_ind]:
                 strategies.append(cdfx[y_ind])
             else:
-                while y_ind > 0 and i/num_bots < cdfy[y_ind]:
+                while y_ind > 0 and (i+1)/num_bots < cdfy[y_ind]:
                     y_ind = y_ind - 1
                 # there are some rounding issues when we reach the end of the cdf
                 # if we reach the end (for the last few players), just use the last value
@@ -113,7 +113,7 @@ def initialize_player_strategies(config):
                     else:
                         to_add.append(val)
                 sample_sets.append(to_add)
-    strategies = np.round(np.array(strategies), 2)
+    strategies = np.round(np.array(strategies), 3)
 
     return strategies, sample_sets
 
@@ -133,7 +133,7 @@ def calculate_payoff(config, strategies, sample_sets):
     xmin = config['xmin']
     xmax = config['xmax']
     # set the array of possible x values
-    x = np.arange(xmin, xmax, 0.01)
+    x = np.round(np.arange(xmin, xmax, 0.01),2)
     positions = []
     ties = []
     # set up initial values for landscape positions and ties
@@ -157,10 +157,13 @@ def calculate_payoff(config, strategies, sample_sets):
     y = ux * vy
     strat_x = np.sort(strategies)
     strat_y = []
+    strategies_y = []
     # calculate bubble positions
     for strat in strat_x:
         strat_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False, strategies=None))
-    return x, y, strat_x, strat_y
+    for strat in strategies:
+        strategies_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False, strategies=None))
+    return x, y, strat_x, strat_y, strategies_y
 
 # Loops through all players and moves them if they are ready to move
 def update_player_strategies(x, y, strategies, sample_sets, config):
@@ -182,20 +185,24 @@ def update_player_strategies(x, y, strategies, sample_sets, config):
     for i in range(len(strategies)):
         if asynchronous is True:
             static_strats = strategies
-        chance = theta * (best_possible - fun.get_y(static_strats[i], static_strats, sample_sets, config, use_bandwidth=True, strategies=strategies))
-        chance = max(chance, 1e-3)
+        chance = theta + 10*(best_possible - fun.get_y(static_strats[i], static_strats, sample_sets, config, use_bandwidth=True, strategies=strategies))/best_possible
+        chance = min(chance, theta+0.05)
+        chance = max(chance, theta-0.05)
         y1 = []
         for val in x:
-            y1.append(fun.get_y(val, strategies, sample_sets, config, seed=i, use_bandwidth=True, strategies=strategies))
+            y1.append(fun.get_y(val, static_strats, sample_sets, config, seed=i, use_bandwidth=True, strategies=strategies))
 #         print(f'{i} needs to compare payoff in y1 {y1}')
         # find the best observed payoff
         best = max(y1)
         # if there are multiple timings with the best payoff, choose randomly
         indices = [k for k, j in enumerate(y1) if j == best]
-        choice = random.choice(indices)
-        choice = x[choice]
+        best_choice = random.choice(indices)
+        best_choice = x[best_choice]
+        # moving chance
+        choice_set = np.array([best_choice, static_strats[i]])
+        choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
         # apply trembling
-        strategies[i] = choice + round((random.random() * trembling - trembling/2), 2)
+        strategies[i] = choice[0] + round((random.random() * trembling - trembling/2), 2)
 
 
 

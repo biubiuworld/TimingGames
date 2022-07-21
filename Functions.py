@@ -1,4 +1,4 @@
-# Returns the position in group for a given timing n
+# Returns the position in group for a given timing n (for a given n, how many strategies are less than n)
 # optional parameter seed denotes which set of players to sample (-1 for no sampling)
 def get_position(n, seed, strats, sample_sets, config):
     '''
@@ -11,7 +11,7 @@ def get_position(n, seed, strats, sample_sets, config):
     :return:
     '''
     # positions are approximated more accurately by adding 0.5 to the value
-    pos = 0.5
+    pos = 1
     samples = []
     # if using sampling, get the stratgies of the sampled players
     if (seed is not None) and (config['sampling'] is not None):
@@ -39,7 +39,7 @@ def get_tie(n, seed, strats, sample_sets, config):
     :return:
     '''
     # this is only here to fix rounding comparison issues
-    n = round(n, 2)
+    n = round(n,2)
 
     tie = 0
     samples = []
@@ -63,7 +63,7 @@ def get_tie(n, seed, strats, sample_sets, config):
 def get_y(n, strats, sample_sets, config, seed=None, use_bandwidth=False, strategies=None):
     '''
 
-    :param n:
+    :param n: float
     :param strats:
     :param sample_sets:
     :param config:
