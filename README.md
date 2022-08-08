@@ -17,4 +17,4 @@ Simulation for timing games.
 - `Simulation` - contain high level simulation functions.
 
 ## run simulation
-- Make a copy of ****.ipynb in this folder and open it in Jupyter Notebook 
+- Make a copy of Timing_game_simulation.ipynb in this folder and open it in Jupyter Notebook 
