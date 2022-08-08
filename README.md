@@ -9,7 +9,7 @@ Simulation for timing games.
 - In the terminal, navigate to the directory where this git repository is cloned at.
 - Run `pip install -e timing_games_package` in the terminal.
 - If seeing `command not found: pip`, try `pip3 install -e timing_games_package`.
-- After installation, run `pip list` and make sure `timing_games_package` is on the Python package list.
+- After installation, run `pip list` or `pip3 list` and make sure `timing_games_package` is on the Python package list.
 
 ## modules
 - `Configuration` - set up simulation configuration parameters
