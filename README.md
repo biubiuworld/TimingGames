@@ -1,8 +1,14 @@
 # TimingGames
 Simulation for timing games.
 
+## clone git repository
+- In the terminal, navigate to a directory where you wish to clone this git repository to.
+- Run `git clone https://github.com/biubiuworld/TimingGames.git`
+
 ## install package
-- `pip install -e timing_games_package` from the folder this is downloaded into.
+- In the terminal, navigate to the directory where this git repository is cloned at.
+- Run `pip install -e timing_games_package` in the terminal.
+- After installation, run `pip list` and make sure `timing_games_package` is on the Python package list.
 
 ## modules
 - `Configuration` - set up simulation configuration parameters
