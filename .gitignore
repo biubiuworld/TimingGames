@@ -6,4 +6,6 @@ __pycache__
 *.zip
 **/build
 **/dist
+**/data
+**/plot
 .DS_Store

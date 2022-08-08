@@ -1,9 +1,8 @@
-import Simulation
-from Configuration import sim_config_init
+from timing_games_package import Simulation
+from timing_games_package.Configuration import sim_config_init
 from Functions import data_logging
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib
 import pandas as pd
 
 from mpl_toolkits import mplot3d

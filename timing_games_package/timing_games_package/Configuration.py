@@ -18,7 +18,7 @@ def sim_config_init(game_type='fear', sampling=None, purification=None,
     :param lgr: tuple, (lambda, gamma, rho), default to (10,1.1,0.5)
     :param cdf_bound: tuple, rush range, default to (1.256,10)
     :param num_bots: int, number of bots, default to 20
-    :param game_length: int, game length, default to 600
+    :param game_length: int, game length, default to 1000
     :param x_bound: tuple, min and max time, default to from 0 to 13
     :return: config, dictionary containing all simulation configuration parameters
     '''
