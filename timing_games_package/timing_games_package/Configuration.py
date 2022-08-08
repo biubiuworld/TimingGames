@@ -9,7 +9,7 @@ def sim_config_init(game_type='fear', sampling=None, purification=None,
     '''
     Specify simulation configuration parameters
     :param game_type: str, game type, default to 'fear'
-    :param sampling: int, number of players to sample (chosen randomly per player at the start of the round), default to None
+    :param sampling: int, number of players to sample (give each player an array of random other players to sample), default to None
     :param purification:
     :param trembling: float, trembling range, default to 0
     :param theta: float, constant for calculating player move chance, default to 0.2

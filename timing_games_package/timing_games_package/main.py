@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     # Simulate players' initial strategies and payoffs
     strategies, sample_sets = Simulation.initialize_player_strategies(sim_config)
-    x, y, strat_x, strat_y, strategies_y = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
+    x, y, strat_x, strat_y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
 
     # Log data for the initial round
     # history = data_logging(['strategies', 'x', 'y', 'strat_x', 'strat_y'], round_idx, history) # To Do
@@ -32,6 +32,7 @@ if __name__ == '__main__':
     history['strat_x', round_idx] = strat_x
     history['strat_y', round_idx] = strat_y
     history['strategies_y', round_idx] = strategies_y
+    history['quantile', round_idx] = quantile
     history['max_strat_x'] = [max(strat_x)]
     history['min_strat_x'] = [min(strat_x)]
     history['avg_strat_x'] = [np.mean(strat_x)]
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     while round_idx < max_game_length:
         round_idx += 1
         strategies = Simulation.update_player_strategies(x, y, strategies, sample_sets, sim_config)
-        x, y, strat_x, strat_y, strategies_y = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
+        x, y, strat_x, strat_y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
 
         # Log data for the round
         history['strategies', round_idx] = strategies.copy()
@@ -56,6 +57,7 @@ if __name__ == '__main__':
         history['strat_x', round_idx] = strat_x
         history['strat_y', round_idx] = strat_y
         history['strategies_y', round_idx] = strategies_y
+        history['quantile', round_idx] = quantile
 
         # Break simulation when detecting player's stretegy jump
         prev_max_strat_x = max(history['strat_x', round_idx-1])
@@ -78,7 +80,7 @@ if __name__ == '__main__':
         # if current_max_strat_x - prev_max_strat_x > 1:
         # if (round(abs(current_max_strat_x - history['first_strat_x'][0]), 2) <= 0.01) & (round_idx >= 50):
         # if (round(abs(first_strat_x - history['first_strat_x'][0]), 2) <= 0.01) & (round_idx >= 50):
-        if round_idx >= 500:
+        if round_idx >= 2:
             print(f'Jump detected, x jumps from {prev_max_strat_x} to {current_max_strat_x}')
         #     print(f'loop detected')
             break
@@ -160,16 +162,31 @@ if __name__ == '__main__':
     # plt.text(history['strat_x', 2][0], history['strat_y', 23][0], 'All bots clump at 1.25')
     # plt.axvline(x=1.25, color='b', label=1.25)
     # plt.axvline(x=1.26, color='r', label=1.26)
-    plt.title('Strategies in period 1')
+    plt.title('Strategies in period 1 (previous)')
     plt.xlabel('x')
     plt.ylabel('payoff')
     plt.grid()
     # plt.legend()
     plt.show()
-    plt.savefig('onesim_period1_strat_x_y_round_trembling0_bots20_asyTrue.png', bbox_inches='tight')
+    plt.savefig('onesim_period1_strat_x_y_round_trembling0_bots20_asyFalse.png', bbox_inches='tight')
+
+#plot quantile
+    plt.plot(history['x', 0], history['quantile', 0])
+    # plt.plot(history['strat_x', 1], history['strat_y', 1], 'ro', fillstyle='none')
+    # plt.text(history['strat_x', 2][0], history['strat_y', 23][0], 'All bots clump at 1.25')
+    # plt.axvline(x=1.25, color='b', label=1.25)
+    # plt.axvline(x=1.26, color='r', label=1.26)
+    plt.title('quantile in period 0 (new)')
+    plt.xlabel('timing')
+    plt.ylabel('quantile')
+    plt.grid()
+    # plt.legend()
+    plt.show()
+    plt.savefig('onesim_period0_strat_x_quantile_round_trembling0_bots20_asyFalse_new.png', bbox_inches='tight')
 
 
-    period = 1000
+
+    period = 2
     plt.plot(history['x', period], history['y', period])
     plt.scatter(history['strategies', period][:5], history['strategies_y', period][:5], label='0-25%', marker='s', color='black')
     # plt.scatter(history['strategies', 2][5:10], history['strategies_y', 2][5:10], label='0.25-0.5')

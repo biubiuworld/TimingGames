@@ -6,7 +6,7 @@ def initialize_player_strategies(config):
     '''
     Function to run first simulation step to initialize each player's initial strategy
     :param config: dict, dictionary contains simulation parameters
-    :return:
+    :return: array, initial strategies;  ndarray, sample sets (None if sampling is none), give each player an array of random other players to sample
     '''
     # game type for starting distribution: set to fear or greed for respective distributions
     # any value other than fear or greed will yield a random start
@@ -57,14 +57,17 @@ def initialize_player_strategies(config):
             # wait_times.append(random.randint(0, wait_time))
             # give each player an array of random other players to sample
             if sampling is not None:
-                to_add = []
-                for j in range(sampling):
-                    val = random.randint(0, num_bots - 1)
-                    # if we've got this player in the sample set already, try again
-                    if val in to_add or val == j:
-                        j = j - 1
-                    else:
-                        to_add.append(val)
+                # to_add = []
+                other_player_index_list = list(range(num_bots))
+                other_player_index_list.remove(i)
+                # for j in range(sampling):
+                #     val = random.randint(0, num_bots - 1)
+                #     # if we've got this player in the sample set already or player i himself, try again
+                #     if val in to_add or val == i:
+                #         j = j - 1
+                #     else:
+                #         to_add.append(val)
+                to_add = random.sample(other_player_index_list, sampling)
                 sample_sets.append(to_add)
     elif game == "greed":
         i = num_bots
@@ -90,8 +93,8 @@ def initialize_player_strategies(config):
                 to_add = []
                 for j in range(sampling):
                     val = random.randint(0, num_bots - 1)
-                    # if we've got this player in the sample set already, try again
-                    if val in to_add or val == j:
+                    # if we've got this player in the sample set already or player i himself, try again
+                    if val in to_add or val == i:
                         j = j - 1
                     else:
                         to_add.append(val)
@@ -107,13 +110,13 @@ def initialize_player_strategies(config):
                 to_add = []
                 for j in range(sampling):
                     val = random.randint(0, num_bots - 1)
-                    # if we've got this player in the sample set already, try again
-                    if val in to_add or val == j:
+                    # if we've got this player in the sample set already or player i himself, try again
+                    if val in to_add or val == i:
                         j = j - 1
                     else:
                         to_add.append(val)
                 sample_sets.append(to_add)
-    strategies = np.round(np.array(strategies), 3)
+    strategies = np.round(np.array(strategies), 2)
 
     return strategies, sample_sets
 
@@ -122,9 +125,10 @@ def calculate_payoff(config, strategies, sample_sets):
     '''
 
     :param config: dict, dictionary contains simulation parameters
-    :param strategies:
-    :param sample_sets:
-    :return:
+    :param strategies: array, current strategies
+    :param sample_sets: ndarray, sample sets (None if sampling is none), give each player an array of random other players to sample
+    :return: x: array of possible x; y: array of payoff given timing x; strat_x: sorted strategies from low to high;
+             strat_y: array of payoffs given sorted strategies; strategies_y: array of payoffs given strategies
     '''
 
     lam = config['lambda']
@@ -144,16 +148,22 @@ def calculate_payoff(config, strategies, sample_sets):
     # calculate timing component
     ux = 1 + (2 * lam * x) - (x * x)
     vy = []
+    quantile = []
     # calculate positional component, including ties
     for i in range(len(positions)):
         if ties[i] == 0:
             vy.append((1 - (positions[i]/len(strategies))/gam) * (1 + (positions[i]/len(strategies))/rho))
+            quantile.append(positions[i]/len(strategies))
         else:
             total = 0
+            total_quantile = 0
             for j in range(ties[i]):
                 total += (1 - ((positions[i]+j)/len(strategies))/gam) * (1 + ((positions[i]+j)/len(strategies))/rho)
+                total_quantile += (positions[i])/len(strategies)
             total = total/ties[i]
             vy.append(total)
+            total_quantile = total_quantile/ties[i]
+            quantile.append(total_quantile)
     y = ux * vy
     strat_x = np.sort(strategies)
     strat_y = []
@@ -163,17 +173,17 @@ def calculate_payoff(config, strategies, sample_sets):
         strat_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False, strategies=None))
     for strat in strategies:
         strategies_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False, strategies=None))
-    return x, y, strat_x, strat_y, strategies_y
+    return x, y, strat_x, strat_y, strategies_y, quantile
 
 # Loops through all players and moves them if they are ready to move
 def update_player_strategies(x, y, strategies, sample_sets, config):
     '''
 
-    :param x: numpy array, time array
+    :param x: numpy array, array of possible x
     :param y: numpy array, payoff array w.r.t each element in x
     :param strategies: list, list containing previous strategies of each player
     :param config: dict, dictionary containing simulation parameters
-    :return:
+    :return: strategies: list, list containing updated strategies of each player
     '''
 
     theta = config['theta']
@@ -202,7 +212,8 @@ def update_player_strategies(x, y, strategies, sample_sets, config):
         choice_set = np.array([best_choice, static_strats[i]])
         choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
         # apply trembling
-        strategies[i] = choice[0] + round((random.random() * trembling - trembling/2), 2)
+        # strategies[i] = choice[0] + round((random.random() * trembling - trembling/2), 2)
+        strategies[i] = best_choice + round((random.random() * trembling - trembling/2), 2)
 
 
 

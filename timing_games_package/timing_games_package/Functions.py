@@ -3,17 +3,17 @@
 def get_position(n, seed, strats, sample_sets, config):
     '''
 
-    :param n:
-    :param seed:
-    :param strats:
-    :param sample_sets:
-    :param config:
-    :return:
+    :param n: float, timing n
+    :param seed: index of player i, default to none
+    :param strats: array, current strategies
+    :param sample_sets: ndarray, sample sets (None if sampling is none), give each player an array of random other players to sample
+    :param config: dict, dictionary containing simulation parameters
+    :return: float, position for timing n
     '''
     # positions are approximated more accurately by adding 0.5 to the value
-    pos = 1
+    pos = 0.5
     samples = []
-    # if using sampling, get the stratgies of the sampled players
+    # if using sampling, get the strategies of the sampled players
     if (seed is not None) and (config['sampling'] is not None):
         for samp in sample_sets[seed]:
             samples.append(strats[samp])
@@ -31,12 +31,12 @@ def get_position(n, seed, strats, sample_sets, config):
 def get_tie(n, seed, strats, sample_sets, config):
     '''
 
-    :param n:
-    :param seed:
-    :param strats:
-    :param sample_sets:
-    :param config:
-    :return:
+    :param n: float, timing n
+    :param seed: index of player i, default to none
+    :param strats: array, current strategies
+    :param sample_sets: ndarray, sample sets (None if sampling is none), give each player an array of random other players to sample
+    :param config: dict, dictionary containing simulation parameters
+    :return: float, ties for timing n
     '''
     # this is only here to fix rounding comparison issues
     n = round(n,2)
@@ -63,14 +63,14 @@ def get_tie(n, seed, strats, sample_sets, config):
 def get_y(n, strats, sample_sets, config, seed=None, use_bandwidth=False, strategies=None):
     '''
 
-    :param n: float
-    :param strats:
-    :param sample_sets:
-    :param config:
-    :param seed:
+    :param n: float, timing n
+    :param strats: array, current strategies
+    :param sample_sets: ndarray, sample sets (None if sampling is none), give each player an array of random other players to sample
+    :param config: dict, dictionary containing simulation parameters
+    :param seed: index of player i, default to none
     :param use_bandwidth:
     :param strategies:
-    :return:
+    :return: float, payoff
     '''
     # calculate the timing component
     ux = 1 + (2 * config['lambda'] * n) - (n * n)
