@@ -1,6 +1,6 @@
 import random
 import numpy as np
-import Functions as fun
+from timing_games_package import Functions as fun
 
 def initialize_player_strategies(config):
     '''
