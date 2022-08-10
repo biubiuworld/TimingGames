@@ -17,4 +17,11 @@ Simulation for timing games.
 - `Simulation` - contain high level simulation functions.
 
 ## run simulation
+- If `jupyter notebook` is not installed, in the terminal, run `pip install notebook` or `pip3 install notebook`.
 - Make a copy of Timing_game_simulation.ipynb in this folder and open it in Jupyter Notebook 
+
+## update package
+- In the terminal, navigate to the directory where this git repository is cloned at.
+- Run `git pull` in the terminal.
+- Run `pip install --upgrade timing_games_package` in the terminal.
+- If seeing `command not found: pip`, try `pip3 install --upgrade timing_games_package`.

@@ -170,9 +170,9 @@ def calculate_payoff(config, strategies, sample_sets):
     strategies_y = []
     # calculate bubble positions
     for strat in strat_x:
-        strat_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False, strategies=None))
+        strat_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False))
     for strat in strategies:
-        strategies_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False, strategies=None))
+        strategies_y.append(fun.get_y(strat, strategies, sample_sets, config, seed=None, use_bandwidth=False))
     return x, y, strat_x, strat_y, strategies_y, quantile
 
 # Loops through all players and moves them if they are ready to move
@@ -193,14 +193,12 @@ def update_player_strategies(x, y, strategies, sample_sets, config):
     static_strats = np.copy(strategies)
     best_possible = max(y)
     for i in range(len(strategies)):
+        # apply asynchronous
         if asynchronous is True:
             static_strats = strategies
-        chance = theta + 10*(best_possible - fun.get_y(static_strats[i], static_strats, sample_sets, config, use_bandwidth=True, strategies=strategies))/best_possible
-        chance = min(chance, theta+0.05)
-        chance = max(chance, theta-0.05)
         y1 = []
         for val in x:
-            y1.append(fun.get_y(val, static_strats, sample_sets, config, seed=i, use_bandwidth=True, strategies=strategies))
+            y1.append(fun.get_y(val, static_strats, sample_sets, config, seed=i, use_bandwidth=True))
 #         print(f'{i} needs to compare payoff in y1 {y1}')
         # find the best observed payoff
         best = max(y1)
@@ -208,12 +206,17 @@ def update_player_strategies(x, y, strategies, sample_sets, config):
         indices = [k for k, j in enumerate(y1) if j == best]
         best_choice = random.choice(indices)
         best_choice = x[best_choice]
-        # moving chance
         choice_set = np.array([best_choice, static_strats[i]])
-        choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
+        # moving chance
+        if theta is not None:
+            chance = theta + 10*(best_possible - fun.get_y(static_strats[i], static_strats, sample_sets, config, use_bandwidth=True))/best_possible
+            chance = min(chance, theta+0.05)
+            chance = max(chance, theta-0.05)
+            choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
         # apply trembling
-        # strategies[i] = choice[0] + round((random.random() * trembling - trembling/2), 2)
-        strategies[i] = best_choice + round((random.random() * trembling - trembling/2), 2)
+            strategies[i] = choice[0] + round((random.random() * trembling - trembling/2), 2)
+        else:
+            strategies[i] = best_choice + round((random.random() * trembling - trembling/2), 2)
 
 
 

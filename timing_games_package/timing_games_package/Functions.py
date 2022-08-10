@@ -11,7 +11,7 @@ def get_position(n, seed, strats, sample_sets, config):
     :return: float, position for timing n
     '''
     # positions are approximated more accurately by adding 0.5 to the value
-    pos = 0.5
+    pos = 1
     samples = []
     # if using sampling, get the strategies of the sampled players
     if (seed is not None) and (config['sampling'] is not None):
@@ -60,7 +60,7 @@ def get_tie(n, seed, strats, sample_sets, config):
 
 
 # Returns the payoff at timing n
-def get_y(n, strats, sample_sets, config, seed=None, use_bandwidth=False, strategies=None):
+def get_y(n, strats, sample_sets, config, seed=None, use_bandwidth=False):
     '''
 
     :param n: float, timing n
@@ -69,7 +69,6 @@ def get_y(n, strats, sample_sets, config, seed=None, use_bandwidth=False, strate
     :param config: dict, dictionary containing simulation parameters
     :param seed: index of player i, default to none
     :param use_bandwidth:
-    :param strategies:
     :return: float, payoff
     '''
     # calculate the timing component
@@ -77,7 +76,7 @@ def get_y(n, strats, sample_sets, config, seed=None, use_bandwidth=False, strate
     ties = get_tie(n, seed, strats, sample_sets, config)
     pos = get_position(n, seed, strats, sample_sets, config)
     if (seed is not None) and (config['purification'] is not None):
-        puriVal = 1 - (config['purification'] * seed/len(strategies))
+        puriVal = 1 - (config['purification'] * seed/len(strats))
     else:
         puriVal = 1
     vy = (1 - (pos * puriVal/len(strats))/config['gamma']) * (1 + (pos * puriVal/len(strats)/config['rho']))
@@ -91,19 +90,19 @@ def get_y(n, strats, sample_sets, config, seed=None, use_bandwidth=False, strate
     if (config['bandwidth'] is not None) and use_bandwidth:
         ux = 0
         start_x = n - config['bandwidth']
-        for i in range(config['num_bots']+1):
+        for i in range(21):
             ux += 1 + (2 * config['lambda'] * start_x) - (start_x * start_x)
             start_x += config['bandwidth']/10
-            ties = get_tie(n, seed, strats, sample_sets, config)
-            pos = get_position(n, seed, strats, sample_sets, config)
-            vy = (1 - (pos * puriVal/len(strats))/config['gamma']) * (1 + (pos * puriVal/len(strats)/config['rho']))
-            # if there are ties, calculate the average of the position components over the tie range
-            if ties > 0:
-                vy1 = 0
-                for j in range(ties):
-                    vy1 += (1 - ((pos+j) * puriVal/len(strats))/config['gamma']) * (1 + ((pos+j) * puriVal/len(strats))/config['rho'])
-                vy1 = vy/ties
-        ux = ux/(config['num_bots']+1)
+        # ties = get_tie(n, seed, strats, sample_sets, config)
+        # pos = get_position(n, seed, strats, sample_sets, config)
+        # vy = (1 - (pos * puriVal/len(strats))/config['gamma']) * (1 + (pos * puriVal/len(strats)/config['rho']))
+        # # if there are ties, calculate the average of the position components over the tie range
+        # if ties > 0:
+        #     vy1 = 0
+        #     for j in range(ties):
+        #         vy1 += (1 - ((pos+j) * puriVal/len(strats))/config['gamma']) * (1 + ((pos+j) * puriVal/len(strats))/config['rho'])
+        #     vy1 = vy/ties
+        ux = ux/21
     return ux * vy
 
 
