@@ -22,6 +22,6 @@ Simulation for timing games.
 
 ## update package
 - In the terminal, navigate to the directory where this git repository is cloned at.
-- Run `git pull` in the terminal.
+- Run `git checkout`, then run `git fetch`, and finally run `git pull`
 - Run `pip install --upgrade timing_games_package` in the terminal.
 - If seeing `command not found: pip`, try `pip3 install --upgrade timing_games_package`.
