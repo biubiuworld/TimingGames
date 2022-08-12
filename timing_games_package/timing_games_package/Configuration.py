@@ -2,7 +2,7 @@ import math
 
 
 def sim_config_init(game_type='fear', sampling=None, purification=None,
-                    trembling=0., theta=0.05, bandwidth=None, asynchronous=False,
+                    trembling=0., theta=0.05, bandwidth=None, asynchronous=True,
                     lgr=(10,1.1,0.5),
                     num_bots=20, game_length=1000,
                     x_bound=(0,13)):

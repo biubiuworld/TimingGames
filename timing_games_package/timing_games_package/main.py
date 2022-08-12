@@ -46,7 +46,7 @@ if __name__ == '__main__':
     max_game_length = sim_config['game_length']
     while round_idx < max_game_length:
         round_idx += 1
-        strategies = Simulation.update_player_strategies(x, y, strategies, sample_sets, sim_config)
+        strategies = Simulation.update_player_strategies(x, y, strategies,strategies_y, sample_sets, sim_config)
         x, y, strat_x, strat_y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
 
         # Log data for the round
