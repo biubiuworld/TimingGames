@@ -32,6 +32,8 @@ if __name__ == '__main__':
     history['strat_y', round_idx] = strat_y
     history['strategies_y', round_idx] = strategies_y
     history['quantile', round_idx] = quantile
+    history['selected_player_index', round_idx] = None
+
     history['max_strat_x'] = [max(strat_x)]
     history['min_strat_x'] = [min(strat_x)]
     history['avg_strat_x'] = [np.mean(strat_x)]
@@ -46,7 +48,7 @@ if __name__ == '__main__':
     max_game_length = sim_config['game_length']
     while round_idx < max_game_length:
         round_idx += 1
-        strategies = Simulation.update_player_strategies(x, y, strategies,strategies_y, sample_sets, sim_config)
+        strategies, selected_player_index = Simulation.update_player_strategies(x, y, strategies,strategies_y, sample_sets, sim_config)
         x, y, strat_x, strat_y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
 
         # Log data for the round
@@ -57,7 +59,7 @@ if __name__ == '__main__':
         history['strat_y', round_idx] = strat_y
         history['strategies_y', round_idx] = strategies_y
         history['quantile', round_idx] = quantile
-
+        history['selected_player_index', round_idx] = selected_player_index
         # Break simulation when detecting player's stretegy jump
         prev_max_strat_x = max(history['strat_x', round_idx-1])
         current_max_strat_x = max(strat_x)
