@@ -90,14 +90,17 @@ def initialize_player_strategies(config):
             # wait_times.append(random.randint(0, wait_time))
             # give each player an array of random other players to sample
             if sampling is not None:
-                to_add = []
-                for j in range(sampling):
-                    val = random.randint(0, num_bots - 1)
-                    # if we've got this player in the sample set already or player i himself, try again
-                    if val in to_add or val == i:
-                        j = j - 1
-                    else:
-                        to_add.append(val)
+                # to_add = []
+                other_player_index_list = list(range(num_bots))
+                other_player_index_list.remove(i)
+                # for j in range(sampling):
+                #     val = random.randint(0, num_bots - 1)
+                #     # if we've got this player in the sample set already or player i himself, try again
+                #     if val in to_add or val == i:
+                #         j = j - 1
+                #     else:
+                #         to_add.append(val)
+                to_add = random.sample(other_player_index_list, sampling)
                 sample_sets.append(to_add)
             i = i - 1
     else:
@@ -107,14 +110,17 @@ def initialize_player_strategies(config):
             # wait_times.append(random.randint(0, wait_time))
             # give each player an array of random other players to sample
             if sampling is not None:
-                to_add = []
-                for j in range(sampling):
-                    val = random.randint(0, num_bots - 1)
-                    # if we've got this player in the sample set already or player i himself, try again
-                    if val in to_add or val == i:
-                        j = j - 1
-                    else:
-                        to_add.append(val)
+                # to_add = []
+                other_player_index_list = list(range(num_bots))
+                other_player_index_list.remove(i)
+                # for j in range(sampling):
+                #     val = random.randint(0, num_bots - 1)
+                #     # if we've got this player in the sample set already or player i himself, try again
+                #     if val in to_add or val == i:
+                #         j = j - 1
+                #     else:
+                #         to_add.append(val)
+                to_add = random.sample(other_player_index_list, sampling)
                 sample_sets.append(to_add)
     strategies = np.round(np.array(strategies), 2)
 
@@ -192,29 +198,41 @@ def update_player_strategies(x, y, strategies, strategies_y, sample_sets, config
 
     if asynchronous is True:
         best_possible = max(y)
-        # who gets move(i.i.d)
-        #distances_from_best_payoff = abs(strategies_y-best_possible)
-        #selected_player_index = random.choices(players_index, weights=distances_from_best_payoff,k=1)
-        selected_player_index = random.randint(0, len(strategies)-1)
+
+        # jump frequencies proportional to regret
+        distances_from_best_payoff = abs(strategies_y-best_possible)
+        players_index = list(range(len(strategies)))
+        selected_player_index = random.choices(players_index, weights=distances_from_best_payoff,k=1)
+        selected_player_index = selected_player_index[0]
         selected_player_strategy = strategies[selected_player_index]
         selected_player_payoff = strategies_y[selected_player_index]
+
+        # # who gets move(i.i.d)
+        # selected_player_index = random.randint(0, len(strategies)-1)
+        # selected_player_strategy = strategies[selected_player_index]
+        # selected_player_payoff = strategies_y[selected_player_index]
+
         # find best payoff index
         # if there are multiple timings with the best payoff, choose randomly
         indices = [k for k, j in enumerate(y) if j == best_possible]
         best_choice = random.choice(indices)
         best_choice = x[best_choice]
         choice_set = np.array([best_choice, selected_player_strategy])
+
         # moving chance
         if theta is not None:
-            # choice = random.choices(choice_set, weights=[theta, 1-theta], k=1)
-            chance = theta + 10*(best_possible - selected_player_payoff)/best_possible
-            chance = min(chance, theta+0.05)
-            chance = max(chance, theta-0.05)
-            choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
+            choice = random.choices(choice_set, weights=[theta, 1-theta], k=1)
+
+            # chance = theta + 10*(best_possible - selected_player_payoff)/best_possible
+            # chance = min(chance, theta+0.05)
+            # chance = max(chance, theta-0.05)
+            # choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
+
         # apply trembling
             strategies[selected_player_index] = choice[0] + round((random.random() * trembling - trembling/2), 2)
         else:
             strategies[selected_player_index] = best_choice + round((random.random() * trembling - trembling/2), 2)
+
     # if all players make move simultaneously
     else:
         selected_player_index = None
@@ -235,10 +253,13 @@ def update_player_strategies(x, y, strategies, strategies_y, sample_sets, config
             choice_set = np.array([best_choice, static_strats[i]])
             # moving chance
             if theta is not None:
-                chance = theta + 10*(best_possible - fun.get_y(static_strats[i], static_strats, sample_sets, config, use_bandwidth=True))/best_possible
-                chance = min(chance, theta+0.05)
-                chance = max(chance, theta-0.05)
-                choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
+                choice = random.choices(choice_set, weights=[theta, 1 - theta], k=1)
+
+                # chance = theta + 10*(best_possible - fun.get_y(static_strats[i], static_strats, sample_sets, config, use_bandwidth=True))/best_possible
+                # chance = min(chance, theta+0.05)
+                # chance = max(chance, theta-0.05)
+                # choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
+
             # apply trembling
                 strategies[i] = choice[0] + round((random.random() * trembling - trembling/2), 2)
             else:
