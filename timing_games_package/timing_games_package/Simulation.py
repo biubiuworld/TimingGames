@@ -205,7 +205,6 @@ def update_player_strategies(x, y, strategies, strategies_y, sample_sets, config
         selected_player_index = random.choices(players_index, weights=distances_from_best_payoff,k=1)
         selected_player_index = selected_player_index[0]
         selected_player_strategy = strategies[selected_player_index]
-        selected_player_payoff = strategies_y[selected_player_index]
 
         # # who gets move(i.i.d)
         # selected_player_index = random.randint(0, len(strategies)-1)
@@ -213,8 +212,12 @@ def update_player_strategies(x, y, strategies, strategies_y, sample_sets, config
         # selected_player_payoff = strategies_y[selected_player_index]
 
         # find best payoff index
+        y1 = []
+        for val in x:
+            y1.append(fun.get_y(val, strategies, sample_sets, config, seed=selected_player_index, use_bandwidth=True))
+        best = max(y1)
         # if there are multiple timings with the best payoff, choose randomly
-        indices = [k for k, j in enumerate(y) if j == best_possible]
+        indices = [k for k, j in enumerate(y1) if j == best]
         best_choice = random.choice(indices)
         best_choice = x[best_choice]
         choice_set = np.array([best_choice, selected_player_strategy])
