@@ -1,12 +1,13 @@
 import math
 
 
-def sim_config_init(lgr=(10,1.1,0.5), sampling=None, purification=None,
-                    trembling=0., theta=0.05, bandwidth=None, asynchronous=True,
+def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purification=None,
+                    trembling=0., theta=None, bandwidth=None, asynchronous=True,
                     num_bots=20, game_length=1000,
                     ):
     '''
     Specify simulation configuration parameters
+    :param game_type: string, game type
     :param lgr: tuple, (lambda, gamma, rho), default to (10,1.1,0.5)
     :param sampling: int, number of players to sample (give each player an array of random other players to sample), default to None
     :param purification: idiosyncratic shifts of perceived landscape
@@ -39,21 +40,27 @@ def sim_config_init(lgr=(10,1.1,0.5), sampling=None, purification=None,
     # set to -1 to disable
     config['bandwidth'] = bandwidth
 
+    # game type
+    config['game_type'] = game_type
+
     # lambda/gamma/rho params
     config['lambda'] = lgr[0]
     config['gamma'] = lgr[1]
     config['rho'] = lgr[2]
-    # specify game type
-    if config['gamma'] < (config['rho'] + 2/3):
-        config['game_type'] = 'fear'
-    elif config['gamma'] > (config['rho'] + 4/3):
+
+    # based on gamma and rho, override game type
+    if config['gamma'] >= (config['rho'] + 4/3):
         config['game_type'] = 'greed'
-    else:
-        config['game_type'] = 'other'
+    elif config['gamma'] <= (config['rho'] + 2/3):
+        config['game_type'] = 'fear'
 
     # rush range (MUST BE CORRECT IF STARTING AT CDF)
-    config['cdfmin'] = round((config['lambda'] - math.sqrt(1+config['lambda']**2) * math.sqrt(1-(16*(1+config['rho'])*(config['gamma']-1))/((config['gamma'] +3*config['rho'])*(3*config['gamma'] +config['rho'])))),2)
-    config['cdfmax'] = config['lambda']
+    if config['game_type'] == 'fear':
+        config['cdfmin'] = max(0, round((config['lambda'] - math.sqrt(1+config['lambda']**2) * math.sqrt(1-(16*(1+config['rho'])*(config['gamma']-1))/((config['gamma'] +3*config['rho'])*(3*config['gamma'] +config['rho'])))),2))
+        config['cdfmax'] = config['lambda']
+    elif config['game_type'] == 'greed':
+        config['cdfmin'] = config['lambda']
+        config['cdfmax'] = config['lambda'] + math.sqrt(1+config['lambda']**2)/(math.sqrt(1+16*config['rho']*config['gamma']/((3*config['gamma']-3*config['rho']-2)*(config['gamma']-config['rho']+2))))
 
     # game synchronicity
     # False means all players decide their moves based on the previous tick
@@ -67,7 +74,7 @@ def sim_config_init(lgr=(10,1.1,0.5), sampling=None, purification=None,
     config['game_length'] = game_length
 
     # x bound
-    config['xmin'] = 0
-    config['xmax'] = config['lambda'] + 3
+    config['xmin'] = max(0 , config['cdfmin']-2)
+    config['xmax'] = config['cdfmax'] + 3
 
     return config

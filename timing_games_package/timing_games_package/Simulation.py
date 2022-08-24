@@ -74,10 +74,10 @@ def initialize_player_strategies(config):
         while i > 0:
             # y_ind is the index in the cdf to compare to
             # we decrement it until it is less than or equal to the percentage of players set so far
-            if (i+1)/num_bots >= cdfy[y_ind]:
+            if (i-1)/num_bots >= cdfy[y_ind]:
                 strategies.append(cdfx[y_ind])
             else:
-                while y_ind > 0 and (i+1)/num_bots < cdfy[y_ind]:
+                while y_ind > 0 and (i-1)/num_bots < cdfy[y_ind]:
                     y_ind = y_ind - 1
                 # there are some rounding issues when we reach the end of the cdf
                 # if we reach the end (for the last few players), just use the last value

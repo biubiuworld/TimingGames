@@ -10,8 +10,11 @@ def get_position(n, seed, strats, sample_sets, config):
     :param config: dict, dictionary containing simulation parameters
     :return: float, position for timing n
     '''
-    # positions are approximated more accurately by adding 0.5 to the value
-    pos = 1
+    # positions are approximated more accurately by adding 0 to the value for greed and 1 for fear game
+    if config['game_type'] == 'fear':
+        pos = 1
+    elif config['game_type'] == 'greed':
+        pos = 0
     samples = []
     # if using sampling, get the strategies of the sampled players
     if (seed is not None) and (config['sampling'] is not None):

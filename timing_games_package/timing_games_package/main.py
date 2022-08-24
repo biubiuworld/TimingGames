@@ -81,7 +81,7 @@ if __name__ == '__main__':
         # if current_max_strat_x - prev_max_strat_x > 1:
         # if (round(abs(current_max_strat_x - history['first_strat_x'][0]), 2) <= 0.01) & (round_idx >= 50):
         # if (round(abs(first_strat_x - history['first_strat_x'][0]), 2) <= 0.01) & (round_idx >= 50):
-        if round_idx >= 2:
+        if round_idx >= 3:
             print(f'Jump detected, x jumps from {prev_max_strat_x} to {current_max_strat_x}')
         #     print(f'loop detected')
             break
