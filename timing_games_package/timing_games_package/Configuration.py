@@ -3,7 +3,7 @@ import math
 
 def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purification=None,
                     trembling=0., theta=None, bandwidth=None, asynchronous=True,
-                    num_bots=20, game_length=1000,
+                    num_bots=20, game_length=1000, xrange=(2,10), move_percent = 0.5,
                     ):
     '''
     Specify simulation configuration parameters
@@ -17,6 +17,7 @@ def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purifica
     :param asynchronous: boolean, game synchronicity, False means all players decide their moves based on the previous tick, True means players see moves as they happen, default to False
     :param num_bots: int, number of bots, default to 20
     :param game_length: int, game length, default to 1000
+    :param xrange: tuple, strategy range
     :return: config, dictionary containing all simulation configuration parameters
     '''
 
@@ -49,9 +50,9 @@ def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purifica
     config['rho'] = lgr[2]
 
     # based on gamma and rho, override game type
-    if config['gamma'] >= (config['rho'] + 4/3):
+    if (config['game_type'] != 'other') and (config['gamma'] >= (config['rho'] + 4/3)):
         config['game_type'] = 'greed'
-    elif config['gamma'] <= (config['rho'] + 2/3):
+    elif (config['game_type'] != 'other') and (config['gamma'] <= (config['rho'] + 2/3)):
         config['game_type'] = 'fear'
 
     # rush range (MUST BE CORRECT IF STARTING AT CDF)
@@ -74,7 +75,13 @@ def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purifica
     config['game_length'] = game_length
 
     # x bound
-    config['xmin'] = max(0 , config['cdfmin']-2)
-    config['xmax'] = config['cdfmax'] + 3
+    if (config['game_type'] == 'fear') or (config['game_type'] == 'greed'):
+        config['xmin'] = max(0 , config['cdfmin']-2)
+        config['xmax'] = config['cdfmax'] + 3
+    else:
+        config['xmin'] = xrange[0]
+        config['xmax'] = xrange[1]
+
+    config['move_percent'] = move_percent
 
     return config

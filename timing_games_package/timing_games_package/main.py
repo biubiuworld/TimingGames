@@ -34,15 +34,15 @@ if __name__ == '__main__':
     history['quantile', round_idx] = quantile
     history['selected_player_index', round_idx] = None
 
-    history['max_strat_x'] = [max(strat_x)]
-    history['min_strat_x'] = [min(strat_x)]
-    history['avg_strat_x'] = [np.mean(strat_x)]
-
-    history['first_strat_x'] = [strat_x[0]]
-    history['first_strat_y'] = [strat_y[0]]
-    history['last_strat_x'] = [strat_x[-1]]
-    history['last_strat_y'] = [strat_y[-1]]
-    history['max_strat_y'] = [max(strat_y)]
+    # history['max_strat_x'] = [max(strat_x)]
+    # history['min_strat_x'] = [min(strat_x)]
+    # history['avg_strat_x'] = [np.mean(strat_x)]
+    #
+    # history['first_strat_x'] = [strat_x[0]]
+    # history['first_strat_y'] = [strat_y[0]]
+    # history['last_strat_x'] = [strat_x[-1]]
+    # history['last_strat_y'] = [strat_y[-1]]
+    # history['max_strat_y'] = [max(strat_y)]
 
     # Iterate simulation to update players' strategies and payoff
     max_game_length = sim_config['game_length']
@@ -61,31 +61,31 @@ if __name__ == '__main__':
         history['quantile', round_idx] = quantile
         history['selected_player_index', round_idx] = selected_player_index
         # Break simulation when detecting player's stretegy jump
-        prev_max_strat_x = max(history['strat_x', round_idx-1])
-        current_max_strat_x = max(strat_x)
-        current_max_strat_y = max(strat_y)
-        first_strat_x = strat_x[0]
-        first_strat_y = strat_y[0]
-        last_strat_x = strat_x[-1]
-        last_strat_y = strat_y[-1]
-        history['max_strat_x'].append(current_max_strat_x)
-        history['min_strat_x'].append(min(strat_x))
-        history['avg_strat_x'].append(np.mean(strat_x))
-
-        history['first_strat_x'].append(first_strat_x)
-        history['first_strat_y'].append(first_strat_y)
-        history['last_strat_x'].append(last_strat_x)
-        history['last_strat_y'].append(last_strat_y)
-
-        history['max_strat_y'].append(current_max_strat_y)
+        # prev_max_strat_x = max(history['strat_x', round_idx-1])
+        # current_max_strat_x = max(strat_x)
+        # current_max_strat_y = max(strat_y)
+        # first_strat_x = strat_x[0]
+        # first_strat_y = strat_y[0]
+        # last_strat_x = strat_x[-1]
+        # last_strat_y = strat_y[-1]
+        # history['max_strat_x'].append(current_max_strat_x)
+        # history['min_strat_x'].append(min(strat_x))
+        # history['avg_strat_x'].append(np.mean(strat_x))
+        #
+        # history['first_strat_x'].append(first_strat_x)
+        # history['first_strat_y'].append(first_strat_y)
+        # history['last_strat_x'].append(last_strat_x)
+        # history['last_strat_y'].append(last_strat_y)
+        #
+        # history['max_strat_y'].append(current_max_strat_y)
         # if current_max_strat_x - prev_max_strat_x > 1:
         # if (round(abs(current_max_strat_x - history['first_strat_x'][0]), 2) <= 0.01) & (round_idx >= 50):
         # if (round(abs(first_strat_x - history['first_strat_x'][0]), 2) <= 0.01) & (round_idx >= 50):
-        if round_idx >= 3:
-            print(f'Jump detected, x jumps from {prev_max_strat_x} to {current_max_strat_x}')
-        #     print(f'loop detected')
-            break
-        print(round_idx)
+        # if round_idx >= 10:
+        #     print(f'Jump detected, x jumps from {prev_max_strat_x} to {current_max_strat_x}')
+        # #     print(f'loop detected')
+        #     break
+        # print(round_idx)
 #     print(f'Simulation {sim_idx} finished')
 #     jump_result.append(round_idx)
 #     sim_idx += 1
@@ -116,8 +116,8 @@ if __name__ == '__main__':
     # plot_max_strat_x = np.array(history['max_strat_x'])
     # plot_max_strat_y = np.array(history['max_strat_y'])
     #
-    first_strat_x = np.array(history['first_strat_x'])
-    first_strat_y = np.array(history['first_strat_y'])
+    # first_strat_x = np.array(history['first_strat_x'])
+    # first_strat_y = np.array(history['first_strat_y'])
     #
     # plot_last_strat_x = np.array(history['last_strat_x'])
     # plot_last_strat_y = np.array(history['last_strat_y'])

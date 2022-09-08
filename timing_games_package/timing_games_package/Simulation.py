@@ -19,18 +19,6 @@ def initialize_player_strategies(config):
     xmin = config['xmin']
     xmax = config['xmax']
 
-    # calculate the theoretical cdf
-    cdfx = np.round(np.arange(config['cdfmin'], config['cdfmax'], 0.01), 2)
-
-    if game == "fear":
-        cdfy = gam - rho + np.sqrt((gam + rho) ** 2 - 4 * ((1 + rho) * (gam - 1) * (1 + lam ** 2))/(1 + 2 * lam * cdfx - cdfx ** 2))
-        y_ind = 0
-        cdfy = cdfy/2
-    elif game == "greed":
-        cdfy = gam - rho - np.sqrt((gam + rho) ** 2 - 4 * gam * rho * (1 + lam ** 2)/(1 + 2 * lam * cdfx - cdfx ** 2))
-        y_ind = len(cdfy) - 1
-        cdfy = cdfy/2
-
     strategies = []
     sample_sets = []
 
@@ -38,6 +26,10 @@ def initialize_player_strategies(config):
     # these calculations are inexact because we have a finite number of players
     # greed, fear, and random starting distributions have differing calculations
     if game == "fear":
+        cdfx = np.round(np.arange(config['cdfmin'], config['cdfmax'], 0.01), 2)
+        cdfy = gam - rho + np.sqrt((gam + rho) ** 2 - 4 * ((1 + rho) * (gam - 1) * (1 + lam ** 2))/(1 + 2 * lam * cdfx - cdfx ** 2))
+        y_ind = 0
+        cdfy = cdfy/2
         for i in range(num_bots):
             # y_ind is the index in the cdf to compare to
             # we increment it until it is greater than or equal to the percentage of players set so far
@@ -69,7 +61,13 @@ def initialize_player_strategies(config):
                 #         to_add.append(val)
                 to_add = random.sample(other_player_index_list, sampling)
                 sample_sets.append(to_add)
+
     elif game == "greed":
+        cdfx = np.round(np.arange(config['cdfmin'], config['cdfmax'], 0.01), 2)
+        cdfy = gam - rho - np.sqrt((gam + rho) ** 2 - 4 * gam * rho * (1 + lam ** 2) / (1 + 2 * lam * cdfx - cdfx ** 2))
+        y_ind = len(cdfy) - 1
+        cdfy = cdfy / 2
+
         i = num_bots
         while i > 0:
             # y_ind is the index in the cdf to compare to
@@ -170,6 +168,11 @@ def calculate_payoff(config, strategies, sample_sets):
             vy.append(total)
             total_quantile = total_quantile/ties[i]
             quantile.append(total_quantile)
+    quantile = np.array(quantile)
+    if config['game_type'] == 'fear':
+        quantile = quantile - 1/config['num_bots']
+    elif config['game_type'] == 'other':
+        quantile = quantile - 0.5/config['num_bots']
     y = ux * vy
     strat_x = np.sort(strategies)
     strat_y = []
@@ -195,6 +198,47 @@ def update_player_strategies(x, y, strategies, strategies_y, sample_sets, config
     theta = config['theta']
     asynchronous = config['asynchronous']
     trembling = config['trembling']
+    move_size = round(config['move_percent'] *config['num_bots'])
+
+    # if asynchronous is True:
+    #     best_possible = max(y)
+    #
+    #     # jump frequencies proportional to regret
+    #     distances_from_best_payoff = abs(strategies_y-best_possible)
+    #     players_index = list(range(len(strategies)))
+    #     selected_player_index = random.choices(players_index, weights=distances_from_best_payoff,k=1)
+    #     selected_player_index = selected_player_index[0]
+    #     selected_player_strategy = strategies[selected_player_index]
+    #
+    #     # # who gets move(i.i.d)
+    #     # selected_player_index = random.randint(0, len(strategies)-1)
+    #     # selected_player_strategy = strategies[selected_player_index]
+    #     # selected_player_payoff = strategies_y[selected_player_index]
+    #
+    #     # find best payoff index
+    #     y1 = []
+    #     for val in x:
+    #         y1.append(fun.get_y(val, strategies, sample_sets, config, seed=selected_player_index, use_bandwidth=True))
+    #     best = max(y1)
+    #     # if there are multiple timings with the best payoff, choose randomly
+    #     indices = [k for k, j in enumerate(y1) if j == best]
+    #     best_choice = random.choice(indices)
+    #     best_choice = x[best_choice]
+    #     choice_set = np.array([best_choice, selected_player_strategy])
+    #
+    #     # moving chance
+    #     if theta is not None:
+    #         choice = random.choices(choice_set, weights=[theta, 1-theta], k=1)
+    #
+    #         # chance = theta + 10*(best_possible - selected_player_payoff)/best_possible
+    #         # chance = min(chance, theta+0.05)
+    #         # chance = max(chance, theta-0.05)
+    #         # choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
+    #
+    #     # apply trembling
+    #         strategies[selected_player_index] = choice[0] + round((random.random() * trembling - trembling/2), 2)
+    #     else:
+    #         strategies[selected_player_index] = best_choice + round((random.random() * trembling - trembling/2), 2)
 
     if asynchronous is True:
         best_possible = max(y)
@@ -202,29 +246,35 @@ def update_player_strategies(x, y, strategies, strategies_y, sample_sets, config
         # jump frequencies proportional to regret
         distances_from_best_payoff = abs(strategies_y-best_possible)
         players_index = list(range(len(strategies)))
-        selected_player_index = random.choices(players_index, weights=distances_from_best_payoff,k=1)
-        selected_player_index = selected_player_index[0]
-        selected_player_strategy = strategies[selected_player_index]
+        selected_player_index = random.choices(players_index, weights=distances_from_best_payoff,k=move_size)
+        selected_player_index = set(selected_player_index)
+        if len(selected_player_index) != move_size:
+            remaining_player_index = set(players_index) - selected_player_index
+            remaining_selected_index = random.sample(remaining_player_index,k=move_size-len(selected_player_index))
+            selected_player_index.update(remaining_selected_index)
 
-        # # who gets move(i.i.d)
-        # selected_player_index = random.randint(0, len(strategies)-1)
-        # selected_player_strategy = strategies[selected_player_index]
-        # selected_player_payoff = strategies_y[selected_player_index]
-
+        for i in selected_player_index:
+            selected_player_strategy = strategies[i]
         # find best payoff index
-        y1 = []
-        for val in x:
-            y1.append(fun.get_y(val, strategies, sample_sets, config, seed=selected_player_index, use_bandwidth=True))
-        best = max(y1)
-        # if there are multiple timings with the best payoff, choose randomly
-        indices = [k for k, j in enumerate(y1) if j == best]
-        best_choice = random.choice(indices)
-        best_choice = x[best_choice]
-        choice_set = np.array([best_choice, selected_player_strategy])
+            if config['sampling'] is not None:
+                y1 = []
+                for val in x:
+                    y1.append(fun.get_y(val, strategies, sample_sets, config, seed=i, use_bandwidth=True))
+                best = max(y1)
+                # if there are multiple timings with the best payoff, choose randomly
+                indices = [k for k, j in enumerate(y1) if j == best]
+                best_choice = random.choice(indices)
+                best_choice = x[best_choice]
+                choice_set = np.array([best_choice, selected_player_strategy])
+            else:
+                indices = [k for k, j in enumerate(y) if j == best_possible]
+                best_choice = random.choice(indices)
+                best_choice = x[best_choice]
+                choice_set = np.array([best_choice, selected_player_strategy])
 
         # moving chance
-        if theta is not None:
-            choice = random.choices(choice_set, weights=[theta, 1-theta], k=1)
+            if theta is not None:
+                choice = random.choices(choice_set, weights=[theta, 1-theta], k=1)
 
             # chance = theta + 10*(best_possible - selected_player_payoff)/best_possible
             # chance = min(chance, theta+0.05)
@@ -232,9 +282,9 @@ def update_player_strategies(x, y, strategies, strategies_y, sample_sets, config
             # choice = random.choices(choice_set, weights=[chance, 1-chance], k=1)
 
         # apply trembling
-            strategies[selected_player_index] = choice[0] + round((random.random() * trembling - trembling/2), 2)
-        else:
-            strategies[selected_player_index] = best_choice + round((random.random() * trembling - trembling/2), 2)
+                strategies[i] = choice[0] + round((random.random() * trembling - trembling/2), 2)
+            else:
+                strategies[i] = best_choice + round((random.random() * trembling - trembling/2), 2)
 
     # if all players make move simultaneously
     else:

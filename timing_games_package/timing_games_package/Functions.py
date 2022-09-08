@@ -15,6 +15,8 @@ def get_position(n, seed, strats, sample_sets, config):
         pos = 1
     elif config['game_type'] == 'greed':
         pos = 0
+    else:
+        pos = 0.5
     samples = []
     # if using sampling, get the strategies of the sampled players
     if (seed is not None) and (config['sampling'] is not None):
