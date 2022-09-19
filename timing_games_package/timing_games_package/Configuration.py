@@ -2,8 +2,8 @@ import math
 
 
 def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purification=None,
-                    trembling=0., theta=None, bandwidth=None, asynchronous=True,
-                    num_bots=20, game_length=1000, xrange=(2,10), move_percent = 0.5,
+                    trembling=0., bandwidth=None,
+                    num_bots=20, move_percent=1.0, game_length=1000, xrange=(2,10),
                     ):
     '''
     Specify simulation configuration parameters
@@ -34,8 +34,6 @@ def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purifica
     # set to 0 to have no effect
     config['trembling'] = trembling
 
-    # constant for calculating player move chance
-    config['theta'] = theta
 
     # smoothing bandwidth
     # set to -1 to disable
@@ -63,13 +61,12 @@ def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purifica
         config['cdfmin'] = config['lambda']
         config['cdfmax'] = config['lambda'] + math.sqrt(1+config['lambda']**2)/(math.sqrt(1+16*config['rho']*config['gamma']/((3*config['gamma']-3*config['rho']-2)*(config['gamma']-config['rho']+2))))
 
-    # game synchronicity
-    # False means all players decide their moves based on the previous tick
-    # True means players see moves as they happen
-    config['asynchronous'] = asynchronous
 
     # number of bots
     config['num_bots'] = num_bots
+
+    # move percentage
+    config['move_percent'] = move_percent
 
     # game length
     config['game_length'] = game_length
@@ -82,6 +79,5 @@ def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purifica
         config['xmin'] = xrange[0]
         config['xmax'] = xrange[1]
 
-    config['move_percent'] = move_percent
 
     return config
