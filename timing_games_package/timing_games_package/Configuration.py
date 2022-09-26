@@ -1,9 +1,9 @@
 import math
 
 
-def sim_config_init(game_type= 'fear', lgr=(10,1.1,0.5), sampling=None, purification=None,
-                    trembling=0., bandwidth=None,
-                    num_bots=20, move_percent=1.0, game_length=1000, xrange=(2,10),
+def sim_config_init(game_type= 'greed', lgr=(10,3,2), sampling=None, purification=0.9,
+                    trembling=0.2, bandwidth=None,
+                    num_bots=20, move_percent=0.2, game_length=1000, xrange=(2,10),
                     ):
     '''
     Specify simulation configuration parameters

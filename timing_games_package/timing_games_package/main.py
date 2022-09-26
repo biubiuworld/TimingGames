@@ -21,15 +21,13 @@ if __name__ == '__main__':
 
     # Simulate players' initial strategies and payoffs
     strategies, sample_sets = Simulation.initialize_player_strategies(sim_config)
-    x, y, strat_x, strat_y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
+    x, y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
 
     # Log data for the initial round
     # history = data_logging(['strategies', 'x', 'y', 'strat_x', 'strat_y'], round_idx, history) # To Do
     history['strategies', round_idx] = strategies.copy()
     history['x', round_idx] = x
     history['y', round_idx] = y
-    history['strat_x', round_idx] = strat_x
-    history['strat_y', round_idx] = strat_y
     history['strategies_y', round_idx] = strategies_y
     history['quantile', round_idx] = quantile
     history['selected_player_index', round_idx] = None
@@ -49,14 +47,12 @@ if __name__ == '__main__':
     while round_idx < max_game_length:
         round_idx += 1
         strategies, selected_player_index = Simulation.update_player_strategies(x, y, strategies,strategies_y, sample_sets, sim_config)
-        x, y, strat_x, strat_y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
+        x, y, strategies_y, quantile = Simulation.calculate_payoff(sim_config, strategies, sample_sets)
 
         # Log data for the round
         history['strategies', round_idx] = strategies.copy()
         history['x', round_idx] = x
         history['y', round_idx] = y
-        history['strat_x', round_idx] = strat_x
-        history['strat_y', round_idx] = strat_y
         history['strategies_y', round_idx] = strategies_y
         history['quantile', round_idx] = quantile
         history['selected_player_index', round_idx] = selected_player_index
